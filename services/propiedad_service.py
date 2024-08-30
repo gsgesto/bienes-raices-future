@@ -31,9 +31,18 @@ def update_property():
     conn = connect_db()
     cursor = conn.cursor()
 
-    id_propiedad = input("Igrese el id de la propiedad a actualizar: ")
+    id_propiedad = input("Ingrese el id de la propiedad a actualizar: ")
+
+    cursor.execute('SELECT * FROM Propiedad WHERE Id_Propiedad = ?', (id_propiedad,))
+    propiedad = cursor.fetchone()
+
+    if not propiedad:
+        print("Propiedad no encontrada.")
+        conn.close()
+        return
+
     nombre = input("Ingrese el nuevo nombre de la propiedad: ")
-    direccion = input("Ingrese el nuevo direccion de la propiedad: ")
+    direccion = input("Ingrese la nueva dirección de la propiedad: ")
     contacto = input("Ingrese el nuevo contacto de la propiedad: ")
 
     cursor.execute('''
@@ -42,14 +51,15 @@ def update_property():
         WHERE Id_Propiedad = ?''',
         (nombre, direccion, contacto, id_propiedad)
     )
+
     print("Propiedad actualizada exitosamente.")
     cursor.execute('''
         SELECT * FROM Propiedad WHERE Id_Propiedad = ?''',
         (id_propiedad,)
     )
 
-    propiedad = cursor.fetchone()
-    print(tabulate([propiedad], headers=headers, tablefmt="fancy_grid"))
+    propiedad_actualizada = cursor.fetchone()
+    print(tabulate([propiedad_actualizada], headers=headers, tablefmt="fancy_grid"))
     conn.commit()
     conn.close()
 
@@ -59,10 +69,20 @@ def delete_property():
 
     id_propiedad = input("Ingrese el id de la propiedad a eliminar: ")
 
+    # Verificar si el ID existe
+    cursor.execute('SELECT * FROM Propiedad WHERE Id_Propiedad = ?', (id_propiedad,))
+    propiedad = cursor.fetchone()
+
+    if not propiedad:
+        print("Propiedad no encontrada.")
+        conn.close()
+        return
+
     cursor.execute('''
         DELETE FROM Propiedad WHERE Id_Propiedad = ?''',
         (id_propiedad,)
     )
+
     print("Propiedad eliminada exitosamente.")
     conn.commit()
     conn.close()
